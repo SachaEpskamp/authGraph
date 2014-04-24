@@ -6,23 +6,25 @@ readfun <- function(x,range)
 
   # Remove duplicates:
   Tables <- Tables[!duplicated(Tables),]
+  
+  # Select only relevant columns:
+  Tables <- Tables %.% select(c(AU, AF, PY, SO, TC, C1))
 
   # Extract data:
-  auth <- as.character(Tables$AU)
+#   auth <- as.character(Tables$AU)
   year <- as.numeric(Tables$PY)
-  journal <- Tables$SO
+#   journal <- Tables$SO
   years <- as.character(sort(unique(year)))
 
   # Remove years not in range:
-  Tables <- Tables[year >= range[1] & year <= range[2],]
+  Tables <- Tables %.% filter(year >= range[1] & year <= range[2])
 
   return(Tables)
 }
 
-importDir <- function(dir,format="wok",range=c(-Inf,Inf),weighted=FALSE,...)
+importDir <- function(dir,format="wok",...)
 {
   if (missing(dir)) dir <- tk_choose.dir()
-  if (format!="wok") stop("Only Web of Knowledge format supported")
 #   if (format!="wok")
 #   {
     # Import data:
@@ -30,82 +32,91 @@ importDir <- function(dir,format="wok",range=c(-Inf,Inf),weighted=FALSE,...)
     txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE)
     if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
-#     Tables <- do.call("rbind.fill",lapply(txtfiles,readfun,range=range))
-    Tables <- do.call("rbind",lapply(txtfiles,readfun,range=range))
-  
-    if (nrow(Tables)==0) return(NULL)
-  
-    # Remove duplicates:
-    Tables <- Tables[!duplicated(Tables),]
-    
-    # Extract data:
-    auth <- as.character(Tables$AU)
-    year <- as.numeric(Tables$PY)
-    journal <- Tables$SO
-    years <- as.character(sort(unique(year)))
-    
-    # Remove years not in range:
-    Tables <- Tables[years >= range[1] & years <= range[2],]
-    
-    # Make author list:
-    authList <- authOrig <- strsplit(auth,split="\\;|\\.\\,|\\&|\\<and\\>")
-    authList <- lapply(authList,tolower)    
-    authList <- lapply(authList,gsub,pattern="[[:space:]]",replacement="")
-    authList <- lapply(authList,function(x)x[x!=""])
-    #     authList <- lapply(authList,gsub,pattern="[[:punct:]]|[[:space:]]",replacement="")
-    
-    ## CLEANUP RULES ##
-    ## FIRST INITIAL ONLY ###
-    {
-      authList <- lapply(authList,gsub,pattern="(?<=\\,\\w).*",replacement="",perl=TRUE)
+    if (format!="wok") stop("Only Web of Knowledge format supported") else {
+      return(wokData(txtfiles,...))
     }
 
-    authUn <- data.frame(
-      code = unique(unlist(authList)),  
-      stringsAsFactors=FALSE)
-    
-    authUn$surname <- gsub(",(?<=\\,).*","",authUn$code,perl=TRUE)
-
-#     x <- authUn$surname
-#     
-#     dist <- adist(x)
+#     Tables <- do.call("rbind.fill",lapply(txtfiles,readfun,range=range))
+#     Tables <- do.call("rbind",lapply(txtfiles,readfun,range=range))
 #   
-#     close <- which(dist == 1,arr.ind=TRUE)
-#     for (i in 1:nrow(close))
-#     {
-#       print(paste(x[close[i,1]],x[close[i,2]]))
-#     }
+#     if (nrow(Tables)==0) return(NULL)
+# 
+#     # Remove duplicates:
+#     Tables <- Tables[!duplicated(Tables),]
 #     
+#     # Extract data:
+#     if (fullName) 
+#     {
+#       auth <- as.character(Tables$AF)
+#     } else {
+#       auth <- as.character(Tables$AU)
+#     }
+#     year <- as.numeric(Tables$PY)
+#     journal <- Tables$SO
+#     years <- as.character(sort(unique(year)))
+#     
+#     # Remove years not in range:
+#     Tables <- Tables[years >= range[1] & years <= range[2],]
+#     
+#     # Make author list:
+#     authList <- authOrig <- strsplit(auth,split="\\;|\\.\\,|\\&|\\<and\\>")
+#     authList <- lapply(authList,tolower)    
+#     authList <- lapply(authList,gsub,pattern="[[:space:]]",replacement="")
+#     authList <- lapply(authList,function(x)x[x!=""])
+#         authList <- lapply(authList,gsub,pattern="[[:punct:]]|[[:space:]]",replacement="")
+#     
+#     ## CLEANUP RULES ##
+#     ## FIRST INITIAL ONLY ###
+#     if (firstInit) {
+#       if (fullName) warning("firstInit ignored when full name is used") else authList <- lapply(authList,gsub,pattern="(?<=\\,\\w).*",replacement="",perl=TRUE)
+#     }
+# 
 #     authUn <- data.frame(
-#       lowercase = unique(unlist(authList)),
-#       orig = NA)
+#       code = unique(unlist(authList)),  
+#       stringsAsFactors=FALSE)
 #     
-#     authUn$orig <- sapply(authUn$lowercase,function(x)authOrig[which(authOrig2==x)[1]])
+#     authUn$surname <- gsub(",(?<=\\,).*","",authUn$code,perl=TRUE)
+# 
+# #     x <- authUn$surname
+# #     
+# #     dist <- adist(x)
+# #   
+# #     close <- which(dist == 1,arr.ind=TRUE)
+# #     for (i in 1:nrow(close))
+# #     {
+# #       print(paste(x[close[i,1]],x[close[i,2]]))
+# #     }
+# #     
+# #     authUn <- data.frame(
+# #       lowercase = unique(unlist(authList)),
+# #       orig = NA)
+# #     
+# #     authUn$orig <- sapply(authUn$lowercase,function(x)authOrig[which(authOrig2==x)[1]])
+# #     
+# #     dotfun <- function(x)
+# #     {
+# #       if (x[length(x)]==" ") y <- x[-length(x)] else if (x[length(x)]==".") y <- x else y <- c(x,".")
+# #       if (y[1]==" ") y <- y[-1]
+# #       return(paste(y,collapse=""))
+# #     }
+# #     authUn$orig <- sapply(strsplit(authUn$orig,split=""),dotfun)
 #     
-#     dotfun <- function(x)
-#     {
-#       if (x[length(x)]==" ") y <- x[-length(x)] else if (x[length(x)]==".") y <- x else y <- c(x,".")
-#       if (y[1]==" ") y <- y[-1]
-#       return(paste(y,collapse=""))
-#     }
-#     authUn$orig <- sapply(strsplit(authUn$orig,split=""),dotfun)
-    
-    # Compute Adjacency:
-    AuthxPub <- laply(authList,function(x)authUn$code%in%x,.drop=FALSE)
-    authAdj <- 1*(t(AuthxPub) %*% AuthxPub)
-    rm(AuthxPub)
-  
-  if (!weighted) authAdj <- 1*(authAdj>0)
-    
-    rownames(authAdj) <- colnames(authAdj) <- authUn$code
-    
-    Res <- list(
-      Adjacency = authAdj,
-      Names = authUn,
-      Raw = Tables
-      )
-    
-    class(Res) <- "authGraph"
-    return(Res)
-#   }
+#     # Compute Adjacency:
+#     AuthxPub <- laply(authList,function(x)authUn$code%in%x,.drop=FALSE)
+#     authAdj <- 1*(t(AuthxPub) %*% AuthxPub)
+#     rm(AuthxPub)
+#   
+#   if (!weighted) authAdj <- 1*(authAdj>0)
+#     
+#     rownames(authAdj) <- colnames(authAdj) <- authUn$code
+#     
+#     Res <- list(
+#       Adjacency = authAdj,
+#       Names = authUn,
+#       Raw = Tables
+#       )
+#     
+#     class(Res) <- "authGraph"
+#     return(Res)
+# #   }
 }
