@@ -6,10 +6,11 @@ readfun <- function(x,range)
 
   # Remove duplicates:
   Tables <- Tables[!duplicated(Tables),]
-  
-  # Select only relevant columns:
-  Tables <- Tables %.% select(c(AU, AF, PY, SO, TC, C1))
 
+  # Select only relevant columns:
+  Tables <- Tables %.% select(c(AU, AF, PD, PY, DT, DE, ID, EM, CR, TC, SO, TC, C1, UT, SC))
+  Tables$articleID <- seq_len(nrow(Tables))
+  
   # Extract data:
 #   auth <- as.character(Tables$AU)
   year <- as.numeric(Tables$PY)
