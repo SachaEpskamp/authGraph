@@ -62,13 +62,13 @@ wokData <- function(
   Tables$articleID <- seq_len(nrow(Tables))
   
   fullData <- ddply(Tables,.(articleID),function(x){
-#     browser()
+    
     original_name <- unlist(strsplit(as.character(x$AU), split="; "))
     original_fullName <- unlist(strsplit(as.character(x$AF), split="; "))
     if (is.null(original_fullName)) original_fullName <- NA
     
     # If only one author:
-    if (!is.null(x$C1))
+    if (!is.null(x$C1) & !is.na(x$C1))
       {
       if (!is.na(original_fullName) & length(original_fullName) == 1)
         {
