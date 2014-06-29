@@ -70,7 +70,7 @@ wokData <- function(
     # If only one author:
     if (!is.null(x$C1) & !is.na(x$C1))
       {
-      if (!is.na(original_fullName) & length(original_fullName) == 1)
+      if (length(original_fullName) == 1 && !is.na(original_fullName))
         {
           original_address <- x$C1
         } else {

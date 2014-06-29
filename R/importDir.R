@@ -34,7 +34,7 @@ importDir <- function(dir,format="wok",...)
     if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
     if (format!="wok") stop("Only Web of Knowledge format supported") else {
-      return(wokData(txtfiles,...))
+      return(wokData(files=txtfiles,...))
     }
 
 #     Tables <- do.call("rbind.fill",lapply(txtfiles,readfun,range=range))
