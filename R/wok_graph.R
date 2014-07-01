@@ -3,7 +3,7 @@ wokData <- function(
   query, # Query to call the crawler
   files, # List of WOK files
   dir,# Directory to analyse
-  IDby = "cleaned_nameFirstInit", # What variable to ID by?
+  IDby = "cleaned_nameFirstTwoInit", # What variable to ID by?
   range=c( 2000, 2014), # Year range
   fullName = FALSE, # If TRUE, use AF (Author Full name)
   address = FALSE, # If TRUE, use address
@@ -89,6 +89,9 @@ wokData <- function(
     # Initial:
     cleaned_nameFirstInit <-  gsub("(?<=\\,\\w).*","",cleaned_name,perl=TRUE)
     
+    spl <- strsplit(cleaned_name, split = ",")
+    cleaned_nameFirstTwoInit <-  sapply(spl,function(x)paste0(x[1],",",strtrim(x[2],2)))
+    
     # Clean address:
     # Remove author:
     cleaned_address <- gsub("\\[.*?\\] ","",original_address)
@@ -107,10 +110,12 @@ wokData <- function(
       original_address = original_address,
       cleaned_name = cleaned_name,
       cleaned_nameFirstInit = cleaned_nameFirstInit,
+      cleaned_nameFirstTwoInit = cleaned_nameFirstTwoInit,
       cleaned_fullName = cleaned_fullName,
       cleaned_address = cleaned_address,
       fullName_address = fullName_address,
-      articleID = x$articleID
+      articleID = x$articleID,
+      stringsAsFactors = FALSE
       )
     
     
@@ -119,6 +124,7 @@ wokData <- function(
   
 
   # Id:
+  fullData$curname <- fullData[[IDby]]
   fullData$authorID <- as.numeric(as.factor(fullData[[IDby]]))
 #   
 #   

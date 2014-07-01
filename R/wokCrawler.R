@@ -106,7 +106,7 @@ xmlns:woksearchlite="http://woksearchlite.v3.wokmws.thomsonreuters.com">
   
   result <- as.character(postresult)
   # xml <- xmlTreeParse(result)
-  
+  browser()
   # To list:
   xmlList <- xmlToList(result)
   queryId <- xmlList$Body$searchResponse$return$queryId
