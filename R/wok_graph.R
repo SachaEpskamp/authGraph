@@ -98,7 +98,7 @@ wokData <- function(
     # Remove addres after first comma (only keep first university):
     cleaned_address <- gsub("\\,.*","",cleaned_address)
     # Clean:
-    cleaned_address <- strClean(cleaned_address)
+    cleaned_address2 <- strClean(cleaned_address)
     
     # Combine cleaned fullname and address:
     fullName_address <- paste0(cleaned_fullName,".",cleaned_address)
@@ -112,7 +112,8 @@ wokData <- function(
       cleaned_nameFirstInit = cleaned_nameFirstInit,
       cleaned_nameFirstTwoInit = cleaned_nameFirstTwoInit,
       cleaned_fullName = cleaned_fullName,
-      cleaned_address = cleaned_address,
+      address = cleaned_address,
+      cleaned_address = cleaned_address2,
       fullName_address = fullName_address,
       articleID = x$articleID,
       stringsAsFactors = FALSE

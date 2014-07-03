@@ -8,7 +8,8 @@ readfun <- function(x,range)
   Tables <- Tables[!duplicated(Tables),]
 
   # Select only relevant columns:
-  Tables <- Tables %.% select(c(AU, AF, PD, PY, DT, DE, ID, EM, CR, TC, SO, TC, C1, UT, SC))
+#    Tables <- Tables %.% select(c(AU, AF, PD, PY, DT, DE, ID, EM, CR, TC, SO, TC, C1, UT, SC))
+  # Keep all columns!
   Tables$articleID <- seq_len(nrow(Tables))
   
   # Extract data:
