@@ -24,14 +24,14 @@ readfun <- function(x,range)
   return(Tables)
 }
 
-importDir <- function(dir,format="wok",...)
+importDir <- function(dir,format="wok", recursive = FALSE, ...)
 {
   if (missing(dir)) dir <- tk_choose.dir()
 #   if (format!="wok")
 #   {
     # Import data:
   
-    txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE)
+    txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE, recursive = recursive)
     if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
     if (format!="wok") stop("Only Web of Knowledge format supported") else {
