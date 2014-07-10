@@ -168,6 +168,15 @@ authorDis <- function(x, plotGraph = FALSE, filename = "authorDis", maxIter = 10
           # Cited refs in j:
           citj <- strsplit(x$CR[j], split = "; ")[[1]]
           
+          # If any is na, next:
+          if (length(citi) == 0 | length(citj) == 0){
+            next
+          } 
+          if (identical(citi, NA) | identical(citj, NA))
+          {
+            next
+          }
+          
           # Standardized:
           stdCit <- function(x, nInitials = 100)
           {
@@ -243,10 +252,11 @@ authorDis <- function(x, plotGraph = FALSE, filename = "authorDis", maxIter = 10
           eqCitDOI <- outer(DOIsi,
                          DOIsj,
                          '==')
+
           eqCitDOI[is.na(eqCitDOI)] <- FALSE
           eqCitCit[is.na(eqCitCit)] <- FALSE
 
-          if (all(dim(eqCitCit) > 0) & all(dim(eqCitCit) == dim(eqCitDOI)) & sum(eqCitCit | eqCitDOI) >2 )
+          if (all(dim(eqCitCit) > 0) && all(dim(eqCitCit) == dim(eqCitDOI)) && sum(eqCitCit | eqCitDOI) >2 )
           {
             eqMat[i,j] <- eqMat[j,i] <- TRUE 
             next
@@ -298,6 +308,9 @@ authorDis <- function(x, plotGraph = FALSE, filename = "authorDis", maxIter = 10
                             DOIsj,
                             '==')
           
+eqCitDOI[is.na(eqCitDOI)] <- FALSE
+eqCitCit[is.na(eqCitCit)] <- FALSE
+
         if (all(dim(eqCitCit) > 0) && all(dim(eqCitCit) == dim(eqCitDOI)) && sum(eqCitCit | eqCitDOI) > 0 )
         {
           eqMat[i,j] <- eqMat[j,i] <- TRUE 
