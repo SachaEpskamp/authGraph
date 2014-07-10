@@ -47,7 +47,7 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
           #         # - first initial is not the same
           #         # - one initial is nested in the other
           #         # - lev distance between last names > 1 if nchar < 5, 
-          #         cont <- matrix(FALSE,length(curname[[i]]), length(curname[[j]]))
+          #         cont <- Matrix::Matrix(FALSE,length(curname[[i]]), length(curname[[j]]))
           #         
           #         for (ii in seq_along(curname[[i]]))
           #         {
@@ -72,7 +72,7 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
           # New:
           # - lev distance initials > 1
           # - lev distance between last names > 1 if nchar longest name < 5, 2 otherwise
-          cont <- matrix(FALSE,length(curname[[i]]), length(curname[[j]]))
+          cont <- Matrix::Matrix(FALSE,length(curname[[i]]), length(curname[[j]]))
           
           for (ii in seq_along(curname[[i]]))
           {
