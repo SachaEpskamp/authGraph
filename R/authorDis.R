@@ -1,6 +1,9 @@
 # Dummy functionj (implement later)
+# library("igraph")
+# library("Matrix")
 
-authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10, returnList = FALSE
+
+authorDis <- function(x, plotGraph = FALSE, filename = "authorDis", maxIter = 10, returnList = FALSE
                       ){
   stopifnot(is(x, "authGraph"))
 
@@ -152,7 +155,13 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
             next
           } 
           
-          # Else we need to check cited refs:
+          # ONLY CONTINUE IF ANY NAME MATCHES EXACTLY:
+          if (!any(outer(curname[[i]],curname[[j]],'=='))){
+            next
+          }
+          
+          
+          ################## CITED REFS CHECK ##################
           # Cited refs in i:
           citi <- strsplit(x$CR[i], split = "; ")[[1]]
           
@@ -160,7 +169,7 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
           citj <- strsplit(x$CR[j], split = "; ")[[1]]
           
           # Standardized:
-          stdCit <- function(x)
+          stdCit <- function(x, nInitials = 100)
           {
             res <- sapply(x, function(x){
               if (!grepl("^.*?\\d{4}",x)) return(NA)
@@ -170,22 +179,38 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
             
             # Remove lowercase after first space:
             spl <- strsplit(x, split = " ")
-            x <- sapply(spl, function(x) paste(c(x[1],gsub("[a-z]","",x[-1],perl=TRUE)), collapse = " "))
+            
+            # Alle initialen
+#             x <- sapply(spl, function(x) paste(c(x[1],gsub("[a-z]","",x[-1],perl=TRUE)), collapse = " "))
+            
+            # Eerste twee initialen:
+            firstN <- function(x, n){
+              if (length(x) < n){
+                return(x)
+              } else {
+                return(x[1:n])
+              }
+            }
+
+            x <- sapply(spl, function(x) paste(c(x[1],paste(gsub("[a-z]","",x[-1],perl=TRUE), collapse = "")), collapse = ","))
             
             # Remove punctuation:
             x <- tolower(x)
             
             # Remove spaces and punctuation:
             x <- gsub(pattern="[ \\.-]",replacement="",x)
+
+            # Remove all extra letters after comma:
+            x <- gsub(paste0("(?<=,[a-zA-Z]{",nInitials,"})[a-zA-Z]?"),"", x, perl = TRUE)
             
             x
             })
             
             unname(res)
           }
-        
-          stdciti <- stdCit(citi)
-          stdcitj <- stdCit(citj)
+          
+          stdciti <- stdCit(citi, nInitials = 2)
+          stdcitj <- stdCit(citj, nInitials = 2)
           
           
           ### Check if standardized citations are equal:
@@ -194,16 +219,34 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
                          '==')
           eqCitCit[is.na(eqCitCit)] <- FALSE
           
+            if (sum(eqCitCit) >2 )
+            {
+              eqMat[i,j] <- eqMat[j,i] <- TRUE 
+              next
+            } 
           # Check only for DOI:
           # Extract DOIs:
-          DOIsi <- regmatches(citi,regexpr("(?<=DOI )[^(DOI)].*?(?=$)", citi, perl=TRUE))
-          DOIsj <- regmatches(citj,regexpr("(?<=DOI )[^(DOI)].*?(?=$)", citj, perl=TRUE))
+
+          getDOI <- function(x){
+            sapply(seq_along(x), function(iii){
+              m <- regexpr("(?<=DOI )[^(DOI)].*?(?=$)", x[iii], perl=TRUE)
+              if (m == -1)
+                return(NA)
+              
+              regmatches(x[iii],m)
+            })
+          }
+
+          DOIsi <- getDOI(citi)
+          DOIsj <- getDOI(citj)
           
           eqCitDOI <- outer(DOIsi,
                          DOIsj,
                          '==')
-          
-          if (sum(eqCitCit) + sum(eqCitDOI) >2 )
+          eqCitDOI[is.na(eqCitDOI)] <- FALSE
+          eqCitCit[is.na(eqCitCit)] <- FALSE
+
+          if (all(dim(eqCitCit) > 0) & all(dim(eqCitCit) == dim(eqCitDOI)) & sum(eqCitCit | eqCitDOI) >2 )
           {
             eqMat[i,j] <- eqMat[j,i] <- TRUE 
             next
@@ -212,12 +255,25 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
           
           # If i cites j or j cites i, they are equal:
           # via DOI:
-          if ( (x$DI[i] %in% DOIsj & !is.na(x$DI[i]) & x$DI[i] != '') | (x$DI[j] %in% DOIsi & !is.na(x$DI[j]) & x$DI[j] != ''))
+          if ( (x$DI[i] %in% DOIsj && !is.na(x$DI[i]) & x$DI[i] != '') | (x$DI[j] %in% DOIsi & !is.na(x$DI[j]) && x$DI[j] != ''))
           {
             eqMat[i,j] <- eqMat[j,i] <- TRUE 
             next
           }
-         
+
+          # Via reconstructed article name:
+          firstAuti <- which(x$articleID == x$articleID[i])[1]
+          arti <-  paste0(x$cleaned_nameFirstTwoInit[firstAuti],",",x$PY[firstAuti])
+
+          firstAutj <- which(x$articleID == x$articleID[j])[1]
+          artj <-  paste0(x$cleaned_nameFirstTwoInit[firstAutj],",",x$PY[firstAutj])
+          if ( artj %in% stdciti | arti %in% stdcitj )
+          {
+            eqMat[i,j] <- eqMat[j,i] <- TRUE 
+            next
+          }         
+
+
           # If one common self reference, they are equal!
 #           allNames <- gsub(",.*","",unlist(curname[c(i,j)]))
 
@@ -233,8 +289,8 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
                             '==')
           eqCitCit[is.na(eqCitCit)] <- FALSE
 
-          DOIsi <- regmatches( citi[selfciti],regexpr("(?<=DOI )[^(DOI)].*?(?=$)", citi[selfciti], perl=TRUE))
-          DOIsj <- regmatches(citj[selfcitj],regexpr("(?<=DOI )[^(DOI)].*?(?=$)", citj[selfcitj], perl=TRUE))
+          DOIsi <- getDOI(citi[selfciti])
+          DOIsj <- getDOI(citj[selfcitj])
           
           # Check only for DOI:
           # Extract DOIs:
@@ -242,15 +298,17 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
                             DOIsj,
                             '==')
           
-          if (any(eqCitCit) | any(eqCitDOI))
-          {
-            eqMat[i,j] <- eqMat[j,i] <- TRUE 
-            next
-          } 
+        if (all(dim(eqCitCit) > 0) && all(dim(eqCitCit) == dim(eqCitDOI)) && sum(eqCitCit | eqCitDOI) > 0 )
+        {
+          eqMat[i,j] <- eqMat[j,i] <- TRUE 
+          next
+        } 
           
         }
       }
     }
+
+
     # Detect communities:
     iG <- graph.adjacency(eqMat, mode = "undirected")
     com <- fastgreedy.community(iG)
@@ -277,15 +335,20 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
     library(igraph)
     
     coms <- paste("Author",x$authorID) 
+
+    edgeList <- which(eqMat, arr.ind = TRUE)
+    edgeList <- edgeList[edgeList[,1] > edgeList[,2],]
     
-    Graph <- qgraph(eqMat, repulsion = 0.8, DoNotPlot = TRUE, groups = coms, legend = FALSE, esize = 1)
+    Graph <- qgraph(edgeList, repulsion = 0.8, DoNotPlot = TRUE, groups = coms, legend = FALSE, esize = 1,
+                    nNodes = nrow(x), edgelist = TRUE, directed = FALSE)
+
     qgraphAnnotate(Graph, 
                    Name = x$original_fullName, 
                    Authors =  x$AF,
                    Year =  x$PY,
-                   Title =  x$TI,
+                   Title =  gsub("[\'\"]","",x$TI),
                    authorID = x$authorID,
-                   Address = x$address, fromqgraph = FALSE, filename = filename, image.size = "1200x1200")  
+                   Address = gsub("[\'\"]","",x$address), fromqgraph = FALSE, filename = filename, image.size = "1200x1200")  
     
     
   }
