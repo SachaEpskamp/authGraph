@@ -18,7 +18,7 @@ authorDis <- function(x, plotGraph = TRUE, filename = "authorDis", maxIter = 10,
   curname <- strsplit(as.character(x$curname), split = " / ")
   
   # Matrix to indicate if two articleauthors are equal authors:
-  eqMat <- matrix(FALSE,n,n)
+  eqMat <- Matrix::Matrix(FALSE,n,n, sparse = TRUE)
   diag(eqMat) <- TRUE
   
   it <- 1
