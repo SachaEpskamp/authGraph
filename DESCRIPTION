@@ -11,4 +11,3 @@ Description: Graph collaboration of authors on scientific publications
 License: GPL-2
 LazyLoad: yes
 ByteCompile: yes
-Imports: plyr 
