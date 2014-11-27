@@ -12,7 +12,6 @@ wokData <- function(
 )
 {
   if (missing(files) & missing(query) & missing(dir)) stop("'files', 'dir' or 'query' must be assigned.")
-  
   TableList <- list()
   
   if (!missing(dir))
@@ -59,11 +58,12 @@ wokData <- function(
   ## COMPUTE DATA FRAME:
   # For each author:
   # name, fullName, address, article, id (same is same author)
+
   Tables$articleID <- seq_len(nrow(Tables))
   
   fullData <- ddply(Tables,.(articleID),function(x){
-    
     original_name <- unlist(strsplit(as.character(x$AU), split="; "))
+    if (length(original_name)==0) return(NULL)
     original_fullName <- unlist(strsplit(as.character(x$AF), split="; "))
     if (is.null(original_fullName)) original_fullName <- NA
     

@@ -30,7 +30,7 @@ importDir <- function(dir,format="wok", recursive = FALSE, ...)
 #   if (format!="wok")
 #   {
     # Import data:
-  
+
     txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE, recursive = recursive)
     if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
