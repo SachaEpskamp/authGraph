@@ -1,6 +1,7 @@
 readfun <- function(x,range)
 {
 #   cols <- c("PT",  "AU",	"BA",	"BE",	"GP",	"AF",	"BF",	"CA",	"TI",	"SO",	"SE",	"LA",	"DT",	"CT",	"CY",	"CL",	"SP",	"HO",	"DE",	"ID",	"AB",	"C1",	"RP",	"EM",	"RI",	"FU",	"FX",	"CR",	"NR",	"TC",	"Z9",	"PU",	"PI",	"PA",	"SN",	"BN",	"J9",	"JI",	"PD",	"PY",	"VL",	"IS",	"PN",	"SU",	"SI",	"MA",	"BP",	"EP",	"AR",	"DI",	"D2",	"PG",	"P2",	"WC",	"SC",	"GA",	"UT")
+
   Tables <- read.table(x,header=TRUE,sep="\t",fileEncoding="UTF-16",fill=TRUE,stringsAsFactor=FALSE,quote=NULL, row.names=NULL)
   names(Tables) <- c(names(Tables)[names(Tables)!="row.names"],rep(NA,ncol(Tables)-sum(names(Tables)!="row.names")))
 
@@ -14,12 +15,15 @@ readfun <- function(x,range)
   
   # Extract data:
 #   auth <- as.character(Tables$AU)
-  year <- as.numeric(Tables$PY)
+  Tables$year <- year <- as.numeric(Tables$PY)
 #   journal <- Tables$SO
   years <- as.character(sort(unique(year)))
+  
+  # Remove weird NA column:
+  Tables <- Tables[,!is.na(names(Tables))]
 
   # Remove years not in range:
-  Tables <- Tables %>% filter(year >= range[1] & year <= range[2])
+  Tables <- Tables %>% dplyr:::filter(year >= range[1],  year <= range[2])
 
   return(Tables)
 }
@@ -30,7 +34,6 @@ importDir <- function(dir,format="wok", recursive = FALSE, ...)
 #   if (format!="wok")
 #   {
     # Import data:
-
     txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE, recursive = recursive)
     if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
