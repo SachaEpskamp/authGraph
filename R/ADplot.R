@@ -36,4 +36,5 @@ ADplot <- function(x, filename = "ADplot", clusterID, annotate = FALSE)
            nNodes = nrow(x), edgelist = TRUE, directed = FALSE)
   }
   
+  return(edgeList)
 }
