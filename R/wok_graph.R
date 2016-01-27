@@ -37,7 +37,7 @@ wokData <- function(
     Table <- wokDataQuery(query, paste0(range[1],"-01-01"), endDate = paste0(range[2],"-12-31"))
     TableList[[length(TableList)+1]] <- Table
   }
-  
+ 
   Tables <- rbind_all(TableList)
 
   # Extract data:
@@ -53,7 +53,7 @@ wokData <- function(
   
   # Remove years not in range:
   Tables <- Tables[years >= range[1] & years <= range[2],]
-# browser()
+
 
   ## COMPUTE DATA FRAME:
   # For each author:

@@ -1,7 +1,6 @@
 readfun <- function(x,range)
 {
 #   cols <- c("PT",  "AU",	"BA",	"BE",	"GP",	"AF",	"BF",	"CA",	"TI",	"SO",	"SE",	"LA",	"DT",	"CT",	"CY",	"CL",	"SP",	"HO",	"DE",	"ID",	"AB",	"C1",	"RP",	"EM",	"RI",	"FU",	"FX",	"CR",	"NR",	"TC",	"Z9",	"PU",	"PI",	"PA",	"SN",	"BN",	"J9",	"JI",	"PD",	"PY",	"VL",	"IS",	"PN",	"SU",	"SI",	"MA",	"BP",	"EP",	"AR",	"DI",	"D2",	"PG",	"P2",	"WC",	"SC",	"GA",	"UT")
-
   Tables <- read.table(x,header=TRUE,sep="\t",fileEncoding="UTF-16",fill=TRUE,stringsAsFactor=FALSE,quote=NULL, row.names=NULL)
   names(Tables) <- c(names(Tables)[names(Tables)!="row.names"],rep(NA,ncol(Tables)-sum(names(Tables)!="row.names")))
 
@@ -35,7 +34,8 @@ importDir <- function(dir,format="wok", recursive = FALSE, ...)
 #   {
     # Import data:
     txtfiles <- list.files(dir,pattern="\\.txt",full.names=TRUE, recursive = recursive)
-    if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
+
+    # if (any(grepl("niet",txtfiles,ignore.case=TRUE))) return(NULL)
 
     if (format!="wok") stop("Only Web of Knowledge format supported") else {
       return(wokData(files=txtfiles,...))

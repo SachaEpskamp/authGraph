@@ -5,8 +5,9 @@ Version: 0.0.1
 Date: 2012-07-25
 Author: Sacha Epskamp
 Maintainer: Sacha Epskamp <mail@sachaepskamp.com>
-Depends: R (>= 2.15)
-Imports: plyr, qgraph, dplyr, reshape2, httr, XML, Matrix, igraph
+Depends: R (>= 2.15), Rcpp
+LinkingTo: Rcpp
+Imports: plyr, qgraph, dplyr, reshape2, httr, XML, Matrix, igraph, stringdist
 Description: Graph collaboration of authors on scientific publications
 License: GPL-2
 LazyLoad: yes

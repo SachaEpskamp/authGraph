@@ -4,10 +4,14 @@ getGraph <- function(
   )
 {
   stopifnot(is(object, "authGraph"))
+  
+  # Reset numbers:
+  object$authorID <- as.numeric(as.factor((object$authorID)))
+  object$articleID <- as.numeric(as.factor((object$articleID)))                                
 
   # Compute Adjacency:
   object$foo <- 1
-  
+
   AuthxPub <- sparseMatrix(object$authorID, object$articleID)
 #   AuthxPub[is.na(AuthxPub)] <- 0
   
